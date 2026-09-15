@@ -1,4 +1,12 @@
 package com.devshowcase.dto.request;
 
-public record FeedbackRequestDTO(String comment) {
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
+public record FeedbackRequestDTO(
+        @NotBlank
+        String comment,
+
+        @NotNull
+        Long projectId) {
 }

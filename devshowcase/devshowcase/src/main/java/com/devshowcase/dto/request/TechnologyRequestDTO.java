@@ -1,4 +1,8 @@
 package com.devshowcase.dto.request;
 
-public record TechnologyRequestDTO(String name) {
+import jakarta.validation.constraints.NotBlank;
+
+public record TechnologyRequestDTO(
+        @NotBlank
+        String name) {
 }

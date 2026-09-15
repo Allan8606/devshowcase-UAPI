@@ -1,4 +1,12 @@
 package com.devshowcase.dto.response;
 
-public record ProjectResponseDTO() {
+import java.util.Set;
+
+public record ProjectResponseDTO(Long id,
+                                 String title,
+                                 String description,
+                                 String githubUrl,
+                                 String projectUrl,
+                                 Long profileId,
+                                 Set<Long> technologyIds) {
 }
