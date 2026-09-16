@@ -36,13 +36,35 @@ public class ProfileService {
                 .orElseThrow();
 
         return conversoEntity(profile);
+    }
 
+    //Editar Profile
+    public ProfileResponseDTO editar(Long id, ProfileRequestDTO request){
+        Profile profile = profileRepository.findById(id)
+                .orElseThrow();
+
+        profile.setName(request.name());
+        profile.setBio(request.bio());
+        profile.setGithubUrl(request.githubUrl());
+        profile.setLinkedinUrl(request.linkedinUrl());
+
+        Profile save = profileRepository.save(profile);
+
+        return conversoEntity(save);
+
+    }
+
+    //Deletar Profile
+    public void deletar (Long id){
+        Profile profile = profileRepository.findById(id)
+                .orElseThrow();
+        profileRepository.delete(profile);
     }
 
 
 
 
-    //============================CONVERSORES================================
+    //============================MÉTODOS AUXILIARES, PARA CONVERTER================================
     private Profile conversoRequest(ProfileRequestDTO request){
         return new Profile(
                 request.name(),
