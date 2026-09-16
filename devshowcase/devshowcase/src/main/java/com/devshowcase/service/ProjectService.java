@@ -71,12 +71,16 @@ public class ProjectService {
         project.setProfile(profile);
         project.setTechnologies(technologies);
 
-
         Project save = projectRepository.save(project);
 
         return converterParaResponse(save);
+    }
 
+    //Deletar Project
+    public void deletar(Long id){
+        Project project = projectRepository.findById(id).orElseThrow();
 
+        projectRepository.delete(project);
     }
 
 

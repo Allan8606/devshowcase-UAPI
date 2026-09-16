@@ -8,5 +8,6 @@ public record FeedbackRequestDTO(
         String comment,
 
         @NotNull
-        Long projectId) {
+        Long projectId
+) {
 }
