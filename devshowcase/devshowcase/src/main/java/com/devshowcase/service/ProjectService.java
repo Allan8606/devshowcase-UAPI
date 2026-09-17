@@ -93,13 +93,24 @@ public class ProjectService {
     //===================MÉTODOS AUXILIARES, PARA CONVERTER================
     private Project converterParaEntity(ProjectRequestDTO request){
         Profile profile = profileRepository.findById(request.profileId()).orElseThrow();
-        return new Project(
+
+        Set<Technology> technologies = technologyRepository
+                .findAllById(request.technologyIds())
+                .stream()
+                .collect(Collectors.toSet());
+
+        Project project = new Project(
                 request.title(),
                 request.description(),
                 request.githubUrl(),
                 request.projectUrl(),
                 profile
         );
+
+        project.setTechnologies(technologies);
+
+        return project;
+
     }
 
     private ProjectResponseDTO converterParaResponse(Project project) {

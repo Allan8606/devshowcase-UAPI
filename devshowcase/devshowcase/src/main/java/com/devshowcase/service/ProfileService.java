@@ -2,12 +2,16 @@ package com.devshowcase.service;
 
 import com.devshowcase.dto.request.ProfileRequestDTO;
 import com.devshowcase.dto.response.ProfileResponseDTO;
+import com.devshowcase.dto.response.ProjectResponseDTO;
 import com.devshowcase.entity.Profile;
+import com.devshowcase.entity.Project;
 import com.devshowcase.repository.ProfileRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -74,14 +78,33 @@ public class ProfileService {
         );
     }
 
-    private ProfileResponseDTO conversoEntity(Profile profile){
+    private ProfileResponseDTO conversoEntity(Profile profile) {
+
+        Set<Project> projects = profile.getProjects();
+
+        Set<ProjectResponseDTO> projectResponses = projects
+                .stream()
+                .map(project -> new ProjectResponseDTO(
+                        project.getId(),
+                        project.getTitle(),
+                        project.getDescription(),
+                        project.getGithubUrl(),
+                        project.getProjectUrl(),
+                        project.getProfile().getId(),
+                        project.getTechnologies()
+                                .stream()
+                                .map(technology -> technology.getId())
+                                .collect(Collectors.toSet())
+                ))
+                .collect(Collectors.toSet());
+
         return new ProfileResponseDTO(
                 profile.getId(),
                 profile.getName(),
                 profile.getBio(),
                 profile.getGithubUrl(),
                 profile.getLinkedinUrl(),
-                null
+                projectResponses
         );
     }
 }
