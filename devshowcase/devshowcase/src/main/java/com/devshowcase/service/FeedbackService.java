@@ -35,7 +35,7 @@ public class FeedbackService {
     }
 
     //Listar por ID
-    public FeedbackResponseDTO listarPorId(Long id){
+    public FeedbackResponseDTO buscarPorId(Long id){
         Feedback feedback = feedbackRepository.findById(id).orElseThrow();
         return converterParaResponse(feedback);
     }

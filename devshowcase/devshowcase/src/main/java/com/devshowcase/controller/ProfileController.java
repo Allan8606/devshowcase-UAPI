@@ -23,7 +23,7 @@ public class ProfileController {
         return ResponseEntity.ok(cadastrar);
     }
 
-    @GetMapping("/listarTodos")
+    @GetMapping("/profiles")
     public ResponseEntity<List<ProfileResponseDTO>> listarTodos(){
         List<ProfileResponseDTO> profileResponseDTOS = profileService.listarTodos();
         return ResponseEntity.ok(profileResponseDTOS);
@@ -35,13 +35,13 @@ public class ProfileController {
          return ResponseEntity.ok(profileResponseDTO);
      }
 
-    @PutMapping("/editar/{id}")
+    @PutMapping("/profiles/{id}")
     public ResponseEntity<ProfileResponseDTO> editar(@PathVariable Long id, @RequestBody ProfileRequestDTO request){
         ProfileResponseDTO editar = profileService.editar(id, request);
         return ResponseEntity.ok(editar);
     }
 
-    @DeleteMapping("/deletar/{id}")
+    @DeleteMapping("/profiles/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Long id){
         profileService.deletar(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
