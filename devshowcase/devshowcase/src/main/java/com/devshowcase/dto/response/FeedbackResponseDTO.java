@@ -1,6 +1,9 @@
 package com.devshowcase.dto.response;
 
-public record FeedbackResponseDTO(Long id,
-                                  String comment,
-                                  Long projectId) {
+public record FeedbackResponseDTO(
+        Long id,
+        Integer rating,
+        String comment,
+        Long projectId
+) {
 }

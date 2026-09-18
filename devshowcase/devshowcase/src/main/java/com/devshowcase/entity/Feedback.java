@@ -12,8 +12,9 @@ public class Feedback {
     public Feedback() {
     }
 
-    public Feedback(String comment, Project project) {
+    public Feedback(String comment, Integer rating, Project project) {
         this.comment = comment;
+        this.rating = rating;
         this.project = project;
     }
 
@@ -23,6 +24,8 @@ public class Feedback {
     private Long id;
 
     private String comment;
+
+    private Integer rating;
 
     //Um Feedback pertence a um Project
     @ManyToOne

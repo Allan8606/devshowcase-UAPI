@@ -66,15 +66,16 @@ public class FeedbackService {
 
         return new Feedback(
                 request.comment(),
+                request.rating(),
                 project
         );
     }
 
     private FeedbackResponseDTO converterParaResponse(Feedback feedback) {
-
         return new FeedbackResponseDTO(
                 feedback.getId(),
-               feedback.getComment(),
+                feedback.getRating(),
+                feedback.getComment(),
                 feedback.getProject().getId()
         );
     }

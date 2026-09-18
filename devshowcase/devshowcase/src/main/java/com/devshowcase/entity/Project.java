@@ -35,6 +35,9 @@ public class Project {
     private String githubUrl;
     private String projectUrl;
 
+    private Double averageRating = 0.0;
+    private Integer upvotes = 0;
+
     // Um Profile pode ter vários Projects.
     @ManyToOne
     private Profile profile;
