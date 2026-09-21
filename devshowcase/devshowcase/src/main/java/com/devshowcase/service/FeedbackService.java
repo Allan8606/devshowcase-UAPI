@@ -51,12 +51,22 @@ public class FeedbackService {
 
     //Editar Feedback
     public FeedbackResponseDTO editar(Long id, FeedbackRequestDTO request) {
-        Feedback feedback = feedbackRepository.findById(id).orElseThrow(() ->
-                new ResourceNotFoundException("Feedback não encontrado"));
 
+        Feedback feedback = feedbackRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Feedback não encontrado"));
+
+        feedback.setRating(request.rating());
         feedback.setComment(request.comment());
 
         Feedback save = feedbackRepository.save(feedback);
+
+        Double media = calcularMedia(save.getProject().getId());
+
+        Project project = save.getProject();
+        project.setAverageRating(media);
+        projectRepository.save(project);
+
         return converterParaResponse(save);
     }
 
