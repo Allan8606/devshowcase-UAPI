@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotNull;
 
 public record FeedbackRequestDTO(
 
-        @NotNull
+        @NotNull(message = "A nota é obrigatória")
         @Min(1)
         @Max(5)
         Integer rating,

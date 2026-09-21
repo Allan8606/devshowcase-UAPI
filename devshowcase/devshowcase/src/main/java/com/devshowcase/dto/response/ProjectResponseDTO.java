@@ -8,5 +8,7 @@ public record ProjectResponseDTO(Long id,
                                  String githubUrl,
                                  String projectUrl,
                                  Long profileId,
-                                 Set<Long> technologyIds) {
+                                 Set<Long> technologyIds,
+                                 Double averageRating,
+                                 Integer upvotes){
 }

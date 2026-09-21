@@ -94,7 +94,9 @@ public class ProfileService {
                         project.getTechnologies()
                                 .stream()
                                 .map(technology -> technology.getId())
-                                .collect(Collectors.toSet())
+                                .collect(Collectors.toSet()),
+                        project.getAverageRating(),
+                        project.getUpvotes()
                 ))
                 .collect(Collectors.toSet());
 

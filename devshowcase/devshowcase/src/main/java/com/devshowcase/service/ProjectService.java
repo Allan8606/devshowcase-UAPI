@@ -127,7 +127,9 @@ public class ProjectService {
                 project.getGithubUrl(),
                 project.getProjectUrl(),
                 project.getProfile().getId(),
-                technologyIds
+                technologyIds,
+                project.getAverageRating(),
+                project.getUpvotes()
         );
     }
 }
