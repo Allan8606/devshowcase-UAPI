@@ -5,6 +5,7 @@ import com.devshowcase.dto.request.TechnologyRequestDTO;
 import com.devshowcase.dto.response.ProjectResponseDTO;
 import com.devshowcase.dto.response.TechnologyResponseDTO;
 import com.devshowcase.service.TechnologyService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +21,7 @@ public class TechnologyController {
     private final TechnologyService technologyService;
 
     @PostMapping("/technologies")
-    public ResponseEntity<TechnologyResponseDTO> cadastrar(@RequestBody TechnologyRequestDTO request){
+    public ResponseEntity<TechnologyResponseDTO> cadastrar(@RequestBody @Valid TechnologyRequestDTO request){
         return ResponseEntity.ok(technologyService.cadastrar(request));
     }
 
@@ -35,7 +36,7 @@ public class TechnologyController {
     }
 
     @PutMapping("/technologies/{id}")
-    public ResponseEntity<TechnologyResponseDTO> editar(@PathVariable Long id, @RequestBody TechnologyRequestDTO request){
+    public ResponseEntity<TechnologyResponseDTO> editar(@PathVariable Long id, @RequestBody @Valid TechnologyRequestDTO request){
         return ResponseEntity.ok(technologyService.editar(id, request));
     }
 

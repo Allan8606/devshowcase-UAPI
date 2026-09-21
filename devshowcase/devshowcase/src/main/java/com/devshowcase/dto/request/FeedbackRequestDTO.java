@@ -8,16 +8,11 @@ import jakarta.validation.constraints.NotNull;
 public record FeedbackRequestDTO(
 
         @NotNull(message = "A nota é obrigatória")
-        @Min(1)
-        @Max(5)
+        @Min(value = 1, message = "A nota deve ser no mínimo 1")
+        @Max(value = 5, message = "A nota deve ser no máximo 5")
         Integer rating,
 
-        @NotBlank
-
-        @NotBlank(message = "O comentario obrigatória")
-        String comment,
-
-        @NotNull(message = "O ID do projeto é obrigatória")
-        Long projectId
+        @NotBlank(message = "O comentario é obrigatório")
+        String comment
 ) {
 }

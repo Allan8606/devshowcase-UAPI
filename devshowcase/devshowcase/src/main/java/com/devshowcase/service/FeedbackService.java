@@ -4,6 +4,7 @@ import com.devshowcase.dto.request.FeedbackRequestDTO;
 import com.devshowcase.dto.response.FeedbackResponseDTO;
 import com.devshowcase.entity.Feedback;
 import com.devshowcase.entity.Project;
+import com.devshowcase.exception.ResourceNotFoundException;
 import com.devshowcase.repository.FeedbackRepository;
 import com.devshowcase.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,16 +19,23 @@ public class FeedbackService {
     private final FeedbackRepository feedbackRepository;
     private final ProjectRepository projectRepository;
 
-
     //Cadastrar
-    public FeedbackResponseDTO cadastrar(FeedbackRequestDTO request){
-        Feedback feedback = converterParaEntity(request);
+    public FeedbackResponseDTO cadastrar(Long projectId, FeedbackRequestDTO request) {
+
+        Feedback feedback = converterParaEntity(projectId, request);
         Feedback save = feedbackRepository.save(feedback);
+
+        Double media = calcularMedia(save.getProject().getId());
+
+        Project project = save.getProject();
+        project.setAverageRating(media);
+        projectRepository.save(project);
+
         return converterParaResponse(save);
     }
 
     //Listar Todos
-    public List<FeedbackResponseDTO> listarTodos(){
+    public List<FeedbackResponseDTO> listarTodos() {
         return feedbackRepository.findAll()
                 .stream()
                 .map(feedback -> converterParaResponse(feedback))
@@ -35,34 +43,37 @@ public class FeedbackService {
     }
 
     //Listar por ID
-    public FeedbackResponseDTO buscarPorId(Long id){
-        Feedback feedback = feedbackRepository.findById(id).orElseThrow();
+    public FeedbackResponseDTO buscarPorId(Long id) {
+        Feedback feedback = feedbackRepository.findById(id).orElseThrow(() ->
+                new ResourceNotFoundException("Feedback não encontrado"));
         return converterParaResponse(feedback);
     }
 
-    //Editar Project
-    public FeedbackResponseDTO editar(Long id, FeedbackRequestDTO request){
-        Feedback feedback = feedbackRepository.findById(id).orElseThrow();
+    //Editar Feedback
+    public FeedbackResponseDTO editar(Long id, FeedbackRequestDTO request) {
+        Feedback feedback = feedbackRepository.findById(id).orElseThrow(() ->
+                new ResourceNotFoundException("Feedback não encontrado"));
 
         feedback.setComment(request.comment());
+
         Feedback save = feedbackRepository.save(feedback);
         return converterParaResponse(save);
-
     }
 
-    //Deletar Project
-    public void deletar(Long id){
-        Feedback feedback = feedbackRepository.findById(id).orElseThrow();
+    //Deletar Feedback
+    public void deletar(Long id) {
+        Feedback feedback = feedbackRepository.findById(id).orElseThrow(() ->
+                new ResourceNotFoundException("Feedback não encontrado"));
         feedbackRepository.delete(feedback);
     }
 
+    //===================MÉTODOS AUXILIARES================
 
+    private Feedback converterParaEntity(Long projectId, FeedbackRequestDTO request) {
 
-
-    //===================MÉTODOS AUXILIARES, PARA CONVERTER================
-
-    private Feedback converterParaEntity(FeedbackRequestDTO request){
-        Project project = projectRepository.findById(request.projectId()).orElseThrow();
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Projeto não encontrado"));
 
         return new Feedback(
                 request.comment(),
@@ -78,5 +89,22 @@ public class FeedbackService {
                 feedback.getComment(),
                 feedback.getProject().getId()
         );
+    }
+
+    private Double calcularMedia(Long projectId) {
+
+        List<Feedback> feedbacks = feedbackRepository.findByProjectId(projectId);
+
+        if (feedbacks.isEmpty()) {
+            return 0.0;
+        }
+
+        double soma = feedbacks.stream()
+                .mapToInt(Feedback::getRating)
+                .sum();
+
+        double media = soma / feedbacks.size();
+
+        return media;
     }
 }

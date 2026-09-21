@@ -7,10 +7,13 @@ import com.devshowcase.dto.response.ProjectResponseDTO;
 import com.devshowcase.entity.Profile;
 import com.devshowcase.entity.Project;
 import com.devshowcase.entity.Technology;
+import com.devshowcase.exception.ResourceNotFoundException;
 import com.devshowcase.repository.ProfileRepository;
 import com.devshowcase.repository.ProjectRepository;
 import com.devshowcase.repository.TechnologyRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,44 +28,46 @@ public class ProjectService {
     private final ProfileRepository profileRepository;
     private final TechnologyRepository technologyRepository;
 
-    //Cadastrar
-    public ProjectResponseDTO cadastrar(ProjectRequestDTO request){
+    // Cadastrar
+    public ProjectResponseDTO cadastrar(ProjectRequestDTO request) {
         Project project = converterParaEntity(request);
         Project save = projectRepository.save(project);
 
         return converterParaResponse(save);
     }
 
-    //Listar Todos
-    public List<ProjectResponseDTO> listarTodos(){
+    // Listar Todos
+    public List<ProjectResponseDTO> listarTodos() {
         return projectRepository.findAll()
                 .stream()
                 .map(project -> converterParaResponse(project))
                 .toList();
     }
 
-    //Listar por ID
+    // Listar por ID
     public ProjectResponseDTO buscarPorId(Long id) {
         Project project = projectRepository.findById(id)
-                .orElseThrow();
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Projeto não encontrado"));
 
         return converterParaResponse(project);
     }
 
-    //Editar Project
-    public ProjectResponseDTO editar(Long id, ProjectRequestDTO request){
+    // Editar Project
+    public ProjectResponseDTO editar(Long id, ProjectRequestDTO request) {
 
         Project project = projectRepository.findById(id)
-                .orElseThrow();
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Projeto não encontrado"));
 
         Profile profile = profileRepository.findById(request.profileId())
-                .orElseThrow();
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Projeto não encontrado"));
 
         Set<Technology> technologies = technologyRepository
                 .findAllById(request.technologyIds())
                 .stream()
                 .collect(Collectors.toSet());
-
 
         project.setTitle(request.title());
         project.setDescription(request.description());
@@ -76,23 +81,43 @@ public class ProjectService {
         return converterParaResponse(save);
     }
 
-    //Deletar Project
-    public void deletar(Long id){
-        Project project = projectRepository.findById(id).orElseThrow();
+    // Deletar Project
+    public void deletar(Long id) {
+        Project project = projectRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Projeto não encontrado"));
 
         projectRepository.delete(project);
     }
 
+    // Buscar projetos com filtro e paginação
+    public Page<ProjectResponseDTO> buscarComFiltro(
+            String technology,
+            Pageable pageable) {
 
+        Page<Project> projects;
 
+        if (technology != null && !technology.isBlank()) {
 
+            projects = projectRepository
+                    .findByTechnologiesNameIgnoreCase(technology, pageable);
 
+        } else {
 
+            projects = projectRepository.findAll(pageable);
+        }
 
+        return projects
+                .map(project -> converterParaResponse(project));
+    }
 
-    //===================MÉTODOS AUXILIARES, PARA CONVERTER================
-    private Project converterParaEntity(ProjectRequestDTO request){
-        Profile profile = profileRepository.findById(request.profileId()).orElseThrow();
+    // =================== MÉTODOS AUXILIARES ==================
+
+    private Project converterParaEntity(ProjectRequestDTO request) {
+
+        Profile profile = profileRepository.findById(request.profileId())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Perfil não encontrado"));
 
         Set<Technology> technologies = technologyRepository
                 .findAllById(request.technologyIds())
@@ -110,7 +135,6 @@ public class ProjectService {
         project.setTechnologies(technologies);
 
         return project;
-
     }
 
     private ProjectResponseDTO converterParaResponse(Project project) {
@@ -131,5 +155,19 @@ public class ProjectService {
                 project.getAverageRating(),
                 project.getUpvotes()
         );
+    }
+
+    // Adicionar Upvote
+    public ProjectResponseDTO adicionarUpvote(Long id) {
+
+        Project project = projectRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Projeto não encontrado"));
+
+        project.setUpvotes(project.getUpvotes() + 1);
+
+        Project save = projectRepository.save(project);
+
+        return converterParaResponse(save);
     }
 }

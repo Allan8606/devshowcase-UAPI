@@ -5,6 +5,7 @@ import com.devshowcase.dto.response.ProfileResponseDTO;
 import com.devshowcase.dto.response.ProjectResponseDTO;
 import com.devshowcase.entity.Profile;
 import com.devshowcase.entity.Project;
+import com.devshowcase.exception.ResourceNotFoundException;
 import com.devshowcase.repository.ProfileRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -37,7 +38,8 @@ public class ProfileService {
     //Listar por ID
     public ProfileResponseDTO buscarPorId(Long id) {
         Profile profile = profileRepository.findById(id)
-                .orElseThrow();
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Perfil não encontrado"));
 
         return conversoEntity(profile);
     }
@@ -45,7 +47,8 @@ public class ProfileService {
     //Editar Profile
     public ProfileResponseDTO editar(Long id, ProfileRequestDTO request){
         Profile profile = profileRepository.findById(id)
-                .orElseThrow();
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Perfil não encontrado"));
 
         profile.setName(request.name());
         profile.setBio(request.bio());
@@ -61,7 +64,8 @@ public class ProfileService {
     //Deletar Profile
     public void deletar (Long id){
         Profile profile = profileRepository.findById(id)
-                .orElseThrow();
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Perfil não encontrado"));
         profileRepository.delete(profile);
     }
 

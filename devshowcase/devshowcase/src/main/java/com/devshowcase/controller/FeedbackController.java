@@ -7,6 +7,7 @@ import com.devshowcase.dto.response.FeedbackResponseDTO;
 import com.devshowcase.dto.response.TechnologyResponseDTO;
 import com.devshowcase.service.FeedbackService;
 import com.devshowcase.service.TechnologyService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,9 +22,12 @@ public class FeedbackController {
 
     private final FeedbackService feedbackService;
 
-    @PostMapping("/feedbacks")
-    public ResponseEntity<FeedbackResponseDTO> cadastrar(@RequestBody FeedbackRequestDTO request){
-        return ResponseEntity.ok(feedbackService.cadastrar(request));
+    @PostMapping("/projects/{id}/feedbacks")
+    public ResponseEntity<FeedbackResponseDTO> cadastrar(
+            @PathVariable Long id,
+            @RequestBody @Valid FeedbackRequestDTO request) {
+
+        return ResponseEntity.ok(feedbackService.cadastrar(id, request));
     }
 
     @GetMapping("/feedbacks")
@@ -37,7 +41,7 @@ public class FeedbackController {
     }
 
     @PutMapping("/feedbacks/{id}")
-    public ResponseEntity<FeedbackResponseDTO> editar(@PathVariable Long id, @RequestBody FeedbackRequestDTO request){
+    public ResponseEntity<FeedbackResponseDTO> editar(@PathVariable Long id, @RequestBody @Valid FeedbackRequestDTO request){
         return ResponseEntity.ok(feedbackService.editar(id, request));
     }
 

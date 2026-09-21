@@ -4,6 +4,7 @@ package com.devshowcase.controller;
 import com.devshowcase.dto.request.ProfileRequestDTO;
 import com.devshowcase.dto.response.ProfileResponseDTO;
 import com.devshowcase.service.ProfileService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +19,7 @@ public class ProfileController {
     private final ProfileService profileService;
 
     @PostMapping("/profiles")
-    public ResponseEntity<ProfileResponseDTO> cadastrar(@RequestBody ProfileRequestDTO request){
+    public ResponseEntity<ProfileResponseDTO> cadastrar(@RequestBody @Valid ProfileRequestDTO request){
         ProfileResponseDTO cadastrar = profileService.cadastrar(request);
         return ResponseEntity.ok(cadastrar);
     }
@@ -36,7 +37,7 @@ public class ProfileController {
      }
 
     @PutMapping("/profiles/{id}")
-    public ResponseEntity<ProfileResponseDTO> editar(@PathVariable Long id, @RequestBody ProfileRequestDTO request){
+    public ResponseEntity<ProfileResponseDTO> editar(@PathVariable Long id, @RequestBody @Valid ProfileRequestDTO request){
         ProfileResponseDTO editar = profileService.editar(id, request);
         return ResponseEntity.ok(editar);
     }

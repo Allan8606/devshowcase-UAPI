@@ -4,6 +4,7 @@ package com.devshowcase.service;
 import com.devshowcase.dto.request.TechnologyRequestDTO;
 import com.devshowcase.dto.response.TechnologyResponseDTO;
 import com.devshowcase.entity.Technology;
+import com.devshowcase.exception.ResourceNotFoundException;
 import com.devshowcase.repository.TechnologyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -32,13 +33,15 @@ public class TechnologyService {
 
     //Listar Por ID
     public TechnologyResponseDTO buscarPorid(Long id){
-        Technology technology = technologyRepository.findById(id).orElseThrow();
+        Technology technology = technologyRepository.findById(id).orElseThrow(() ->
+                new ResourceNotFoundException("Tecnologia não encontrada"));
         return converteParaResponse(technology);
     }
 
     //Editar
     public TechnologyResponseDTO editar(Long id, TechnologyRequestDTO request){
-        Technology technology = technologyRepository.findById(id).orElseThrow();
+        Technology technology = technologyRepository.findById(id).orElseThrow(() ->
+                new ResourceNotFoundException("Tecnologia não encontrada"));
         technology.setName(request.name());
 
         Technology save = technologyRepository.save(technology);
@@ -48,7 +51,8 @@ public class TechnologyService {
 
     //Deletar
     public void deletar(Long id){
-        Technology technology = technologyRepository.findById(id).orElseThrow();
+        Technology technology = technologyRepository.findById(id).orElseThrow(() ->
+                new ResourceNotFoundException("Tecnologia não encontrada"));
         technologyRepository.delete(technology);
     }
 
