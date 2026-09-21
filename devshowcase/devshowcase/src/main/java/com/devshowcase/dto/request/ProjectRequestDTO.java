@@ -9,14 +9,14 @@ import java.util.Set;
 
 public record ProjectRequestDTO(
         // Esse campo precisa existir e não pode estar vazio ou conter apenas espaços
-        @NotBlank
+        @NotBlank(message = "Título é obrigatório")
         String title,
 
-        @NotBlank
+        @NotBlank(message = "Descrição é obrigatório")
         String description,
 
         // Não pode ser vazio e precisa ter formato de URL
-        @NotBlank
+        @NotBlank(message = "Link do GitHub é obrigatório")
         @Pattern(
                 regexp = "https?://.+",
                 message = "URL do GitHub inválida"
@@ -31,10 +31,10 @@ public record ProjectRequestDTO(
         String projectUrl,
 
         // O ID do perfil é obrigatório
-        @NotNull
+        @NotNull(message = "O ID do perfil é Obrigatório")
         Long profileId,
 
         // É necessário informar pelo menos uma tecnologia
-        @NotEmpty
+        @NotEmpty(message = "Deve possuir pelo menos uma tecnologia")
         Set<Long> technologyIds){
 }
