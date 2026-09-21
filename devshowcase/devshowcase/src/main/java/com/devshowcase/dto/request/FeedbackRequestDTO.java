@@ -4,10 +4,10 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public record FeedbackRequestDTO(
-        @NotBlank
+        @NotBlank(message = "O comentario obrigatória")
         String comment,
 
-        @NotNull
+        @NotNull(message = "O ID do projeto é obrigatória")
         Long projectId
 ) {
 }

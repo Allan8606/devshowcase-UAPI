@@ -4,13 +4,13 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
 public record ProfileRequestDTO(
-                                @NotBlank
+                                @NotBlank(message = "Nome é obrigatório")
                                 String name,
 
-                                @NotBlank
+                                @NotBlank(message = "Biografia é obrigatória")
                                 String bio,
 
-                                @NotBlank
+                                @NotBlank(message = "URL do GitHub é obrigatória")
                                 @Pattern(
                                         regexp = "https?://.+",
                                         message = "URL do GitHub inválida"
