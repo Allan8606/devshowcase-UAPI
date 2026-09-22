@@ -13,6 +13,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -61,17 +62,32 @@ public class ProjectController {
             description = "Retorna projetos cadastrados, com opção de filtragem por tecnologia e paginação."
     )
     @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Projetos retornados com sucesso"
-            )
+            @ApiResponse(responseCode = "200", description = "Projetos retornados com sucesso")
     })
     public ResponseEntity<Page<ProjectResponseDTO>> buscarProjetos(
-            @Parameter(description = "Nome da tecnologia utilizada no projeto", example = "Java")
+            @Parameter(
+                    description = "Nome da tecnologia utilizada no projeto",
+                    example = "Java"
+            )
             @RequestParam(required = false) String technology,
-            Pageable pageable) {
 
-        return ResponseEntity.ok(projectService.buscarComFiltro(technology, pageable));
+            @Parameter(
+                    description = "Número da página",
+                    example = "0"
+            )
+            @RequestParam(defaultValue = "0") int page,
+
+            @Parameter(
+                    description = "Quantidade de projetos por página",
+                    example = "10"
+            )
+            @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        return ResponseEntity.ok(
+                projectService.buscarComFiltro(technology, pageable)
+        );
     }
 
 
