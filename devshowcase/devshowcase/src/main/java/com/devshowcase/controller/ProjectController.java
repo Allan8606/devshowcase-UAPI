@@ -67,17 +67,11 @@ public class ProjectController {
             )
     })
     public ResponseEntity<Page<ProjectResponseDTO>> buscarProjetos(
-            @Parameter(
-                    description = "Nome da tecnologia utilizada no projeto",
-                    example = "Java"
-            )
+            @Parameter(description = "Nome da tecnologia utilizada no projeto", example = "Java")
             @RequestParam(required = false) String technology,
-
             Pageable pageable) {
 
-        return ResponseEntity.ok(
-                projectService.buscarComFiltro(technology, pageable)
-        );
+        return ResponseEntity.ok(projectService.buscarComFiltro(technology, pageable));
     }
 
 
