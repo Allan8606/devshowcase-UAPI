@@ -27,6 +27,14 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
+
+
+
 @ExtendWith(MockitoExtension.class)
 class ProjectServiceTest {
 
@@ -221,6 +229,231 @@ class ProjectServiceTest {
 
 
         }
+
+        @Nested
+        class editar{
+
+            @Test
+            @DisplayName("Deve editar um projeto com sucesso")
+            void deveEditarUmProjeto() {
+
+                // ARRANGE: prepara os dados da edição
+                var request = criarRequest();
+
+                when(projectRepository.findById(project.getId()))
+                        .thenReturn(Optional.of(project));
+
+                when(profileRepository.findById(request.profileId()))
+                        .thenReturn(Optional.of(profile));
+
+                when(technologyRepository.findAllById(request.technologyIds()))
+                        .thenReturn(List.of());
+
+                // Retorna o próprio objeto recebido pelo save()
+                when(projectRepository.save(any(Project.class)))
+                        .thenAnswer(invocation -> invocation.getArgument(0));
+
+
+                // ACT: executa a edição
+                ProjectResponseDTO resultado =
+                        projectService.editar(project.getId(), request);
+
+                // ASSERT: verifica os dados retornados
+                assertNotNull(resultado);
+                assertEquals(project.getId(), resultado.id());
+                assertEquals(request.title(), resultado.title());
+                assertEquals(request.description(), resultado.description());
+                assertEquals(request.githubUrl(), resultado.githubUrl());
+                assertEquals(request.projectUrl(), resultado.projectUrl());
+
+                // VERIFY + CAPTOR: captura o projeto enviado para salvar
+                verify(projectRepository).save(projectArgumentCaptor.capture());
+
+                Project projetoEnviado = projectArgumentCaptor.getValue();
+
+                // Verifica se o objeto enviado contém os dados atualizados
+                assertEquals(request.title(), projetoEnviado.getTitle());
+                assertEquals(request.description(), projetoEnviado.getDescription());
+                assertEquals(request.githubUrl(), projetoEnviado.getGithubUrl());
+                assertEquals(request.projectUrl(), projetoEnviado.getProjectUrl());
+
+                // Verifica se o projeto foi buscado pelo ID correto
+                verify(projectRepository).findById(project.getId());
+            }
+
+            @Test
+            @DisplayName("Deve lançar exceção se projeto não existir")
+            void deveLancarExcecaoSeProjetoNaoExistir() {
+
+                var request = criarRequest();
+
+                when(projectRepository.findById(project.getId())).thenReturn(Optional.empty());
+
+                assertThrows(ResourceNotFoundException.class, ()-> projectService.editar(project.getId(), request));
+                verify(projectRepository).findById(project.getId());
+                verify(projectRepository, never()).save(any(Project.class));
+            }
+
+            @Test
+            @DisplayName("Deve lançar exceção se perfil não existir")
+            void deveLancarExcecaoSePerfilNaoExistir() {
+
+                var request = criarRequest();
+
+                when(projectRepository.findById(project.getId()))
+                        .thenReturn(Optional.of(project));
+                when(profileRepository.findById(profile.getId())).thenReturn(Optional.empty());
+
+                assertThrows(ResourceNotFoundException.class, ()-> projectService.editar(project.getId(), request));
+                verify(profileRepository).findById(profile.getId());
+                verify(projectRepository, never()).save(any(Project.class));
+            }
+
+
+
+
+
+        }
+
+        @Nested
+        class deletar{
+
+            @Test
+            @DisplayName("Deve deletar um Project pelo ID")
+            void deveDeletarUmPorjectPeloId(){
+
+                when(projectRepository.findById(project.getId())).thenReturn(Optional.of(project));
+
+                projectService.deletar(project.getId());
+
+                verify(projectRepository, times(1)).findById(project.getId());
+                verify(projectRepository).delete(project);
+            }
+
+            @Test
+            @DisplayName("Deve lançar uma exceção caso não seja localizado um projeto")
+            void develancarUmaExcecaoCasoNaoSejaLocalizadaoUmProjeto(){
+
+                when(projectRepository.findById(project.getId())).thenReturn(Optional.empty());
+
+                assertThrows(ResourceNotFoundException.class, ()-> projectService.deletar(project.getId()));
+
+                verify(projectRepository).findById(project.getId());
+                verify(projectRepository, never()).delete(project);
+            }
+
+
+        }
+
+    @Nested
+    class buscarComFiltro {
+
+        @Test
+        @DisplayName("Deve buscar projetos filtrando por tecnologia")
+        void deveBuscarProjetosPorTecnologia() {
+
+            // ARRANGE: prepara os dados do teste
+            String technology = "Java";
+            Pageable pageable = PageRequest.of(0, 10);
+
+            Page<Project> paginaProjetos =
+                    new PageImpl<>(List.of(project));
+
+            // Simula o repositório retornando projetos filtrados
+            when(projectRepository.findByTechnologiesNameIgnoreCase(
+                    technology, pageable))
+                    .thenReturn(paginaProjetos);
+
+            // ACT: executa o método que estamos testando
+            Page<ProjectResponseDTO> resultado =
+                    projectService.buscarComFiltro(technology, pageable);
+
+            // ASSERT: verifica o resultado
+            assertNotNull(resultado);
+            assertEquals(1, resultado.getTotalElements());
+            assertEquals(project.getId(),
+                    resultado.getContent().get(0).id());
+            assertEquals(project.getTitle(),
+                    resultado.getContent().get(0).title());
+
+            // VERIFY: confirma que o repositório usou o filtro
+            verify(projectRepository)
+                    .findByTechnologiesNameIgnoreCase(technology, pageable);
+
+            // Confirma que o caminho sem filtro não foi utilizado
+            verify(projectRepository, never()).findAll(pageable);
+        }
+
+
+        @Test
+        @DisplayName("Deve listar todos os projetos quando a tecnologia for null")
+        void deveListarTodosQuandoTecnologiaForNull() {
+
+            // ARRANGE: prepara a página simulada
+            Pageable pageable = PageRequest.of(0, 10);
+
+            Page<Project> paginaProjetos =
+                    new PageImpl<>(List.of(project));
+
+            // Simula o repositório retornando todos os projetos
+            when(projectRepository.findAll(pageable))
+                    .thenReturn(paginaProjetos);
+
+            // ACT: executa o método sem informar tecnologia
+            Page<ProjectResponseDTO> resultado =
+                    projectService.buscarComFiltro(null, pageable);
+
+            // ASSERT: verifica o resultado
+            assertNotNull(resultado);
+            assertEquals(1, resultado.getTotalElements());
+            assertEquals(project.getId(),
+                    resultado.getContent().get(0).id());
+
+            // VERIFY: confirma que todos os projetos foram consultados
+            verify(projectRepository).findAll(pageable);
+
+            // Confirma que o filtro por tecnologia não foi utilizado
+            verify(projectRepository, never())
+                    .findByTechnologiesNameIgnoreCase(
+                            anyString(), eq(pageable));
+        }
+
+
+        @Test
+        @DisplayName("Deve listar todos os projetos quando a tecnologia estiver em branco")
+        void deveListarTodosQuandoTecnologiaEstiverEmBranco() {
+
+            // ARRANGE: prepara a página simulada
+            Pageable pageable = PageRequest.of(0, 10);
+
+            Page<Project> paginaProjetos =
+                    new PageImpl<>(List.of(project));
+
+            when(projectRepository.findAll(pageable))
+                    .thenReturn(paginaProjetos);
+
+            // ACT: executa o método com uma tecnologia em branco
+            Page<ProjectResponseDTO> resultado =
+                    projectService.buscarComFiltro("   ", pageable);
+
+            // ASSERT: verifica o resultado
+            assertNotNull(resultado);
+            assertEquals(1, resultado.getTotalElements());
+            assertEquals(project.getId(),
+                    resultado.getContent().get(0).id());
+
+            // VERIFY: confirma que foi feita a busca sem filtro
+            verify(projectRepository).findAll(pageable);
+
+            // Confirma que o filtro por tecnologia não foi utilizado
+            verify(projectRepository, never())
+                    .findByTechnologiesNameIgnoreCase(
+                            anyString(), eq(pageable));
+        }
+    }
+
+
+
 
 
 
