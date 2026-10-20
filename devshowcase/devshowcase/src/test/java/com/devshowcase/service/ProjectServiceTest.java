@@ -1,6 +1,7 @@
 package com.devshowcase.service;
 
 import com.devshowcase.dto.request.ProjectRequestDTO;
+import com.devshowcase.dto.response.ProjectResponseDTO;
 import com.devshowcase.entity.Profile;
 import com.devshowcase.entity.Project;
 import com.devshowcase.exception.ResourceNotFoundException;
@@ -139,6 +140,85 @@ class ProjectServiceTest {
                 verify(profileRepository).findById(request.profileId());
                 verify(projectRepository, never()).save(any(Project.class));
             }
+
+        }
+
+
+        @Nested
+        class listarTodas{
+
+            @Test
+            @DisplayName("Deve listar todos os projetos cadastrados.")
+            void deveListarTodosProjetos(){
+                List<Project> projectList = List.of(project);
+
+                when(projectRepository.findAll()).thenReturn(projectList);
+
+                List<ProjectResponseDTO> listService = projectService.listarTodos();
+
+                assertNotNull(listService);
+                assertEquals(projectList.size(), listService.size());
+                assertEquals(project.getTitle(), listService.get(0).title());
+                verify(projectRepository).findAll();
+            }
+
+            @Test
+            @DisplayName("Deve retornar uma lista vazia quando não houver projetos")
+            void deveRetornarListaVaziaQuandoNaoHouverProjetos() {
+                // ARRANGE: simula um repositório sem projetos cadastrados
+                when(projectRepository.findAll()).thenReturn(List.of());
+
+                // ACT: executa o método que estamos testando
+                List<ProjectResponseDTO> lista = projectService.listarTodos();
+
+
+                assertNotNull(lista);
+                assertTrue(lista.isEmpty());
+                verify(projectRepository).findAll();
+            }
+        }
+
+
+        @Nested
+        class buscarPorId{
+
+            @Test
+            @DisplayName("Deve buscar um projeto pelo ID")
+            void deveBuscarUmProjetoPeloId() {
+
+                // ARRANGE: simula o repositório encontrando o projeto
+                when(projectRepository.findById(project.getId()))
+                        .thenReturn(Optional.of(project));
+
+                // ACT: executa o método que estamos testando
+                ProjectResponseDTO projectResponseDTO =
+                        projectService.buscarPorId(project.getId());
+
+                // ASSERT: verifica se o resultado foi retornado corretamente
+                assertNotNull(projectResponseDTO);
+                assertEquals(project.getId(), projectResponseDTO.id());
+                assertEquals(project.getTitle(), projectResponseDTO.title());
+
+                // VERIFY: verifica se o repositório foi consultado pelo ID esperado
+                verify(projectRepository).findById(project.getId());
+            }
+
+            @Test
+            @DisplayName("Deve lançar exceção quando não encontrar um projeto")
+            void deveRetornarExcecaoQuandoNaoEncontrarProjeto() {
+
+                // ARRANGE: simula que o projeto não foi encontrado
+                when(projectRepository.findById(project.getId()))
+                        .thenReturn(Optional.empty());
+
+                // ACT + ASSERT: verifica se o serviço lança a exceção esperada
+                assertThrows(
+                        ResourceNotFoundException.class,
+                        () -> projectService.buscarPorId(project.getId())
+                );
+                verify(projectRepository).findById(project.getId());
+            }
+
 
         }
 
