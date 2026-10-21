@@ -345,112 +345,112 @@ class ProjectServiceTest {
 
         }
 
-    @Nested
-    class buscarComFiltro {
+        @Nested
+        class buscarComFiltro {
 
-        @Test
-        @DisplayName("Deve buscar projetos filtrando por tecnologia")
-        void deveBuscarProjetosPorTecnologia() {
+            @Test
+            @DisplayName("Deve buscar projetos filtrando por tecnologia")
+            void deveBuscarProjetosPorTecnologia() {
 
-            // ARRANGE: prepara os dados do teste
-            String technology = "Java";
-            Pageable pageable = PageRequest.of(0, 10);
+                // ARRANGE: prepara os dados do teste
+                String technology = "Java";
+                Pageable pageable = PageRequest.of(0, 10);
 
-            Page<Project> paginaProjetos =
-                    new PageImpl<>(List.of(project));
+                Page<Project> paginaProjetos =
+                        new PageImpl<>(List.of(project));
 
-            // Simula o repositório retornando projetos filtrados
-            when(projectRepository.findByTechnologiesNameIgnoreCase(
-                    technology, pageable))
-                    .thenReturn(paginaProjetos);
+                // Simula o repositório retornando projetos filtrados
+                when(projectRepository.findByTechnologiesNameIgnoreCase(
+                        technology, pageable))
+                        .thenReturn(paginaProjetos);
 
-            // ACT: executa o método que estamos testando
-            Page<ProjectResponseDTO> resultado =
-                    projectService.buscarComFiltro(technology, pageable);
+                // ACT: executa o método que estamos testando
+                Page<ProjectResponseDTO> resultado =
+                        projectService.buscarComFiltro(technology, pageable);
 
-            // ASSERT: verifica o resultado
-            assertNotNull(resultado);
-            assertEquals(1, resultado.getTotalElements());
-            assertEquals(project.getId(),
-                    resultado.getContent().get(0).id());
-            assertEquals(project.getTitle(),
-                    resultado.getContent().get(0).title());
+                // ASSERT: verifica o resultado
+                assertNotNull(resultado);
+                assertEquals(1, resultado.getTotalElements());
+                assertEquals(project.getId(),
+                        resultado.getContent().get(0).id());
+                assertEquals(project.getTitle(),
+                        resultado.getContent().get(0).title());
 
-            // VERIFY: confirma que o repositório usou o filtro
-            verify(projectRepository)
-                    .findByTechnologiesNameIgnoreCase(technology, pageable);
+                // VERIFY: confirma que o repositório usou o filtro
+                verify(projectRepository)
+                        .findByTechnologiesNameIgnoreCase(technology, pageable);
 
-            // Confirma que o caminho sem filtro não foi utilizado
-            verify(projectRepository, never()).findAll(pageable);
+                // Confirma que o caminho sem filtro não foi utilizado
+                verify(projectRepository, never()).findAll(pageable);
+            }
+
+
+            @Test
+            @DisplayName("Deve listar todos os projetos quando a tecnologia for null")
+            void deveListarTodosQuandoTecnologiaForNull() {
+
+                // ARRANGE: prepara a página simulada
+                Pageable pageable = PageRequest.of(0, 10);
+
+                Page<Project> paginaProjetos =
+                        new PageImpl<>(List.of(project));
+
+                // Simula o repositório retornando todos os projetos
+                when(projectRepository.findAll(pageable))
+                        .thenReturn(paginaProjetos);
+
+                // ACT: executa o método sem informar tecnologia
+                Page<ProjectResponseDTO> resultado =
+                        projectService.buscarComFiltro(null, pageable);
+
+                // ASSERT: verifica o resultado
+                assertNotNull(resultado);
+                assertEquals(1, resultado.getTotalElements());
+                assertEquals(project.getId(),
+                        resultado.getContent().get(0).id());
+
+                // VERIFY: confirma que todos os projetos foram consultados
+                verify(projectRepository).findAll(pageable);
+
+                // Confirma que o filtro por tecnologia não foi utilizado
+                verify(projectRepository, never())
+                        .findByTechnologiesNameIgnoreCase(
+                                anyString(), eq(pageable));
+            }
+
+
+            @Test
+            @DisplayName("Deve listar todos os projetos quando a tecnologia estiver em branco")
+            void deveListarTodosQuandoTecnologiaEstiverEmBranco() {
+
+                // ARRANGE: prepara a página simulada
+                Pageable pageable = PageRequest.of(0, 10);
+
+                Page<Project> paginaProjetos =
+                        new PageImpl<>(List.of(project));
+
+                when(projectRepository.findAll(pageable))
+                        .thenReturn(paginaProjetos);
+
+                // ACT: executa o método com uma tecnologia em branco
+                Page<ProjectResponseDTO> resultado =
+                        projectService.buscarComFiltro("   ", pageable);
+
+                // ASSERT: verifica o resultado
+                assertNotNull(resultado);
+                assertEquals(1, resultado.getTotalElements());
+                assertEquals(project.getId(),
+                        resultado.getContent().get(0).id());
+
+                // VERIFY: confirma que foi feita a busca sem filtro
+                verify(projectRepository).findAll(pageable);
+
+                // Confirma que o filtro por tecnologia não foi utilizado
+                verify(projectRepository, never())
+                        .findByTechnologiesNameIgnoreCase(
+                                anyString(), eq(pageable));
+            }
         }
-
-
-        @Test
-        @DisplayName("Deve listar todos os projetos quando a tecnologia for null")
-        void deveListarTodosQuandoTecnologiaForNull() {
-
-            // ARRANGE: prepara a página simulada
-            Pageable pageable = PageRequest.of(0, 10);
-
-            Page<Project> paginaProjetos =
-                    new PageImpl<>(List.of(project));
-
-            // Simula o repositório retornando todos os projetos
-            when(projectRepository.findAll(pageable))
-                    .thenReturn(paginaProjetos);
-
-            // ACT: executa o método sem informar tecnologia
-            Page<ProjectResponseDTO> resultado =
-                    projectService.buscarComFiltro(null, pageable);
-
-            // ASSERT: verifica o resultado
-            assertNotNull(resultado);
-            assertEquals(1, resultado.getTotalElements());
-            assertEquals(project.getId(),
-                    resultado.getContent().get(0).id());
-
-            // VERIFY: confirma que todos os projetos foram consultados
-            verify(projectRepository).findAll(pageable);
-
-            // Confirma que o filtro por tecnologia não foi utilizado
-            verify(projectRepository, never())
-                    .findByTechnologiesNameIgnoreCase(
-                            anyString(), eq(pageable));
-        }
-
-
-        @Test
-        @DisplayName("Deve listar todos os projetos quando a tecnologia estiver em branco")
-        void deveListarTodosQuandoTecnologiaEstiverEmBranco() {
-
-            // ARRANGE: prepara a página simulada
-            Pageable pageable = PageRequest.of(0, 10);
-
-            Page<Project> paginaProjetos =
-                    new PageImpl<>(List.of(project));
-
-            when(projectRepository.findAll(pageable))
-                    .thenReturn(paginaProjetos);
-
-            // ACT: executa o método com uma tecnologia em branco
-            Page<ProjectResponseDTO> resultado =
-                    projectService.buscarComFiltro("   ", pageable);
-
-            // ASSERT: verifica o resultado
-            assertNotNull(resultado);
-            assertEquals(1, resultado.getTotalElements());
-            assertEquals(project.getId(),
-                    resultado.getContent().get(0).id());
-
-            // VERIFY: confirma que foi feita a busca sem filtro
-            verify(projectRepository).findAll(pageable);
-
-            // Confirma que o filtro por tecnologia não foi utilizado
-            verify(projectRepository, never())
-                    .findByTechnologiesNameIgnoreCase(
-                            anyString(), eq(pageable));
-        }
-    }
 
 
 
