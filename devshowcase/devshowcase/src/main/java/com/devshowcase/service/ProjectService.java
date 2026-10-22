@@ -30,6 +30,7 @@ public class ProjectService {
 
     // Cadastrar
     public ProjectResponseDTO cadastrar(ProjectRequestDTO request) {
+
         Project project = converterParaEntity(request);
         Project save = projectRepository.save(project);
 
@@ -113,11 +114,18 @@ public class ProjectService {
 
     // =================== MÉTODOS AUXILIARES ==================
 
-    private Project converterParaEntity(ProjectRequestDTO request) {
-
-        Profile profile = profileRepository.findById(request.profileId())
+    private Profile buscarUmPerfilPeloId(Long id){
+        return profileRepository.findById(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Perfil não encontrado"));
+    }
+
+
+
+
+    private Project converterParaEntity(ProjectRequestDTO request) {
+
+        Profile profile = buscarUmPerfilPeloId(request.profileId());
 
         Set<Technology> technologies = technologyRepository
                 .findAllById(request.technologyIds())

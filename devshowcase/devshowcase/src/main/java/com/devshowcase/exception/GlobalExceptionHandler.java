@@ -20,6 +20,15 @@ public class GlobalExceptionHandler {
                 .body(exception.getMessage());
     }
 
+    @ExceptionHandler(ResourceAlreadyExistsException .class)
+    public ResponseEntity<String> handleResourceAlreadyExists (
+            ResourceNotFoundException exception) {
+
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(exception.getMessage());
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<String> handleValidationException(
             MethodArgumentNotValidException exception) {

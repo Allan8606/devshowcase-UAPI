@@ -5,6 +5,7 @@ import com.devshowcase.dto.response.ProfileResponseDTO;
 import com.devshowcase.dto.response.ProjectResponseDTO;
 import com.devshowcase.entity.Profile;
 import com.devshowcase.entity.Project;
+import com.devshowcase.exception.ResourceAlreadyExistsException;
 import com.devshowcase.exception.ResourceNotFoundException;
 import com.devshowcase.repository.ProfileRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,10 @@ public class ProfileService {
 
     //Cadastrar
     public ProfileResponseDTO cadastrar(ProfileRequestDTO request){
+
+        if(profileRepository.existsByGithubUrl(request.githubUrl())){
+            throw new ResourceAlreadyExistsException("Já existe um perfil cadastrado com esse Git Hub");
+        }
 
         Profile profile = conversoRequest(request);
 
@@ -50,6 +55,12 @@ public class ProfileService {
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Perfil não encontrado"));
 
+        if (!profile.getGithubUrl().equals(request.githubUrl())
+                && profileRepository.existsByGithubUrl(request.githubUrl())) {
+            throw new ResourceAlreadyExistsException(
+                    "Já existe um perfil cadastrado com esse GitHub");
+        }
+
         profile.setName(request.name());
         profile.setBio(request.bio());
         profile.setGithubUrl(request.githubUrl());
@@ -63,9 +74,9 @@ public class ProfileService {
 
     //Deletar Profile
     public void deletar (Long id){
-        Profile profile = profileRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Perfil não encontrado"));
+
+        Profile profile = fazerBuscarPeloId(id);
+
         profileRepository.delete(profile);
     }
 
@@ -73,6 +84,12 @@ public class ProfileService {
 
 
     //============================MÉTODOS AUXILIARES, PARA CONVERTER================================
+
+    private Profile fazerBuscarPeloId(Long id){
+        return profileRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Perfil não encontrado."));
+    }
+
     private Profile conversoRequest(ProfileRequestDTO request){
         return new Profile(
                 request.name(),
